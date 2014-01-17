@@ -1,5 +1,29 @@
 package Pod::Weaver::Section::Requires 0.01;
-# ABSTRACT: Add section with all used modules from package excluding listed ones
+# ABSTRACT: Add Pos::Weaver section with all used modules from package excluding listed ones
+
+=head1 SYNOPSIS
+
+In your C<weaver.ini>:
+
+	[Requires]
+	ignore = base lib constant namespace::sweep
+
+=head1 DESCRIPTION
+
+This L<Pod::Weaver> section plugin creates a "REQUIRES" section in your POD
+which contains a list of the modules used/required by your class. It accomplishes this 
+by using L<Module::Extract::Use> on all classes.
+
+All classes (*.pm files) in your distribution's lib directory will be loaded.
+List of all used modules are gathered and listed ignored classes (pragmas etc.) are
+excluded from this list. POD is changed only for files which actually requires other
+modules than excluded.
+
+=head1 SEE ALSO
+
+L<Pod::Weaver::Section::Extends> 
+
+=cut
 
 use strict;
 use warnings;
@@ -14,14 +38,15 @@ with 'Pod::Weaver::Role::Section';
 use aliased 'Pod::Elemental::Element::Nested';
 use aliased 'Pod::Elemental::Element::Pod5::Command';
 
+# All attributes are private only
 has ignore => (
-	is 		=> 'ro',
-	isa		=> 'Str',
+	is 	=> 'ro',
+	isa	=> 'Str',
 );
 
 has extra_args => (
-    is  => 'rw',
-    isa => 'HashRef',
+	is	=> 'rw',
+	isa	=> 'HashRef',
 );
 
 sub BUILD {
@@ -33,6 +58,7 @@ sub BUILD {
     $self->extra_args($copy);
 }
 
+# This is implicit method of plugin for extending Pod::Weaver, cannot be called directly
 sub weave_section {
     my ( $self, $doc, $input ) = @_;
 
@@ -75,15 +101,16 @@ sub weave_section {
         } );
 }
 
+# Private method for extracting used modules
 sub _get_requires {
-    my ( $self, $module ) = @_;
+	my ( $self, $module ) = @_;
 	
 	my $extor = new Module::Extract::Use;
 	
 	my @modules = $extor->get_modules( $module );
-    print "Possibly harmless: $@" if $extor->error;
+	print "Possibly harmless: $@" if $extor->error;
 
-    return @modules;
+	return @modules;
 }
 
 __PACKAGE__->meta->make_immutable;
