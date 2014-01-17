@@ -1,5 +1,5 @@
 package Pod::Weaver::Section::Requires 0.01;
-# ABSTRACT: Add Pos::Weaver section with all used modules from package excluding listed ones
+# ABSTRACT: Add Pod::Weaver section with all used modules from package excluding listed ones
 
 =head1 SYNOPSIS
 
@@ -50,55 +50,55 @@ has extra_args => (
 );
 
 sub BUILD {
-    my $self = shift;
-    my ($args) = @_;
-    my $copy = {%$args};
-    delete $copy->{$_}
-        for map { $_->init_arg } $self->meta->get_all_attributes;
-    $self->extra_args($copy);
+	my $self = shift;
+	my ($args) = @_;
+	my $copy = {%$args};
+	delete $copy->{$_}
+		for map { $_->init_arg } $self->meta->get_all_attributes;
+	$self->extra_args($copy);
 }
 
 # This is implicit method of plugin for extending Pod::Weaver, cannot be called directly
 sub weave_section {
-    my ( $self, $doc, $input ) = @_;
+	my ( $self, $doc, $input ) = @_;
 
-    my $filename = $input->{filename};
+	my $filename = $input->{filename};
 
-    return if $filename !~ m{\.pm$};
+	return if $filename !~ m{\.pm$};
 
 	my $ignorelist = $self->ignore;
 	my %exclude = map { $_ => 1 } split /\s+/, $ignorelist;
 	
-    my @modules = sort grep { ! exists $exclude{ $_ } } $self->_get_requires( $filename );
+	my @modules = sort grep { ! exists $exclude{ $_ } } $self->_get_requires( $filename );
 
-    return unless @modules;
+	return unless @modules;
 
-    my @pod = (
-        Command->new( {
-            command => 'over',
-               content => 4
-        } ),
-        (
-            map {
-                Command->new( {
-                    command => 'item',
-                    content => "* L<$_>",
-                } ),
-            } @modules
-        ),
-        Command->new( {
-            command => 'back',
-            content => ''
-        } )
-    );
+	my @pod = (
+		Command->new( {
+			command => 'over',
+			content => 4
+		} ),
+		(
+			map {
+				Command->new( {
+					command => 'item',
+					content => "* L<$_>",
+				} ),
+			} @modules
+		),
+		Command->new( {
+			command => 'back',
+			content => ''
+		} )
+	);
 
-    push @{ $doc->children },
+	push @{ $doc->children },
 		Nested->new( {
-            type     => 'command',
-            command  => 'head1',
-            content  => 'REQUIRES',
-            children => \@pod
-        } );
+			type     => 'command',
+			command  => 'head1',
+			content  => 'REQUIRES',
+			children => \@pod
+		} );
 }
 
 # Private method for extracting used modules
