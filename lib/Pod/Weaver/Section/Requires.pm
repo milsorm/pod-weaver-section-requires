@@ -82,7 +82,7 @@ sub weave_section {
 			map {
 				Command->new( {
 					command => 'item',
-					content => "* L<$_>",
+					content => "* L<$_|$_>",
 				} ),
 			} @modules
 		),
