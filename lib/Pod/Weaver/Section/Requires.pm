@@ -1,5 +1,7 @@
-package Pod::Weaver::Section::Requires 0.02;
+package Pod::Weaver::Section::Requires;
 # ABSTRACT: Add Pod::Weaver section with all used modules from package excluding listed ones
+
+our $VERSION = 0.03;
 
 =head1 SYNOPSIS
 
